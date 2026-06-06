@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ranking Nacional · Chiquinho Sorvetes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0B1A2E;
+  --navy2:#0F2340;
+  --navy3:#162D50;
+  --navy4:#1E3A62;
+  --gold:#C8922A;
+  --gold2:#E8A020;
+  --gold3:#F5C842;
+  --gold-pale:#FDF4DC;
+  --gold-tint:#FEF9EE;
+  --cream:#FFFDF7;
+  --border:#C8922A33;
+  --border2:#C8922A55;
+  --ink:#FFFDF7;
+  --ink2:#F0E8D0;
+  --ink3:#A89060;
+  --red:#D71920;
+  --green:#2D8A40;
+  --azure:#1888A0;
+  --surface:rgba(255,253,247,0.04);
+  --surface2:rgba(255,253,247,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--navy);color:var(--ink);min-height:100vh}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--navy2)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+/* HEADER */
+.header{background:var(--navy2);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100}
+.header-stripe{height:3px;background:linear-gradient(90deg,var(--navy2),var(--gold),var(--gold3),var(--gold),var(--navy2))}
+.header-inner{max-width:1400px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-wrap{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(200,146,42,0.4);flex-shrink:0}
+.logo-wrap svg{width:30px;height:30px}
+.brand-name{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--ink);letter-spacing:1.5px;text-transform:uppercase;line-height:1.1}
+.brand-sub{font-size:9px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-top:2px;font-family:'Montserrat',sans-serif}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mes-badge{background:rgba(200,146,42,0.12);border:1px solid var(--border2);color:var(--gold);font-size:10px;font-weight:800;letter-spacing:2px;padding:5px 14px;border-radius:20px;font-family:'Montserrat',sans-serif}
+.btn-upload{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;padding:9px 18px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;box-shadow:0 2px 12px rgba(200,146,42,0.3)}
+.btn-upload:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(200,146,42,0.5)}
+#fileInput{display:none}
+.assinatura{display:flex;align-items:center;gap:8px;border-left:1px solid var(--border);padding-left:14px}
+.assin-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:900;font-size:12px;color:var(--navy);flex-shrink:0}
+.assin-nome{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0.3px}
+.assin-cargo{font-size:9px;color:var(--gold);letter-spacing:0.5px;margin-top:1px}
+
+/* NAV */
+.nav{background:var(--navy3);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1400px;margin:0 auto;padding:0 24px;display:flex;gap:0;overflow-x:auto}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:13px 20px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(200,146,42,0.45);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.nav-btn:hover{color:var(--gold);background:rgba(200,146,42,0.05)}
+.nav-btn.active{color:var(--gold3);border-bottom-color:var(--gold3);background:rgba(200,146,42,0.08)}
+.nav-btn .ricon{font-size:15px}
+.nav-badge{background:rgba(200,146,42,0.18);color:var(--gold);font-size:8px;padding:2px 7px;border-radius:20px;font-weight:800}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:20px 24px 60px}
+
+/* KPI STRIP */
+.kpi-strip{display:none;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;position:relative;overflow:hidden;transition:all 0.2s;cursor:default;backdrop-filter:blur(4px)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--gold))}
+.kpi:hover{background:var(--surface2);border-color:var(--border2);transform:translateY(-1px)}
+.kpi-val{font-family:'Montserrat',sans-serif;font-size:19px;font-weight:900;color:var(--kc,var(--gold));line-height:1;margin-bottom:3px}
+.kpi-label{font-size:9px;color:var(--ink3);letter-spacing:0.8px;text-transform:uppercase;font-family:'Montserrat',sans-serif}
+.kpi-sub{font-size:10px;color:var(--ink3);margin-top:2px;font-weight:600}
+
+/* UPLOAD */
+.upload-area{border:1px dashed var(--border2);border-radius:12px;padding:52px 24px;text-align:center;background:var(--surface);margin-bottom:20px;cursor:pointer;transition:all 0.2s}
+.upload-area:hover{border-color:var(--gold);background:var(--surface2)}
+.upload-icon{font-size:44px;margin-bottom:12px;filter:grayscale(0.2)}
+.upload-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.upload-desc{font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto}
+.upload-hint{font-size:10px;color:var(--ink3);background:rgba(200,146,42,0.08);border:1px solid var(--border);padding:6px 14px;border-radius:8px;display:inline-block}
+.tpl-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tpl-bar p{font-size:11px;color:var(--ink3)}
+.btn-dl{display:flex;align-items:center;gap:6px;background:var(--gold);color:var(--navy);border:none;padding:8px 14px;border-radius:7px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;cursor:pointer;transition:all 0.2s}
+.btn-dl:hover{background:var(--gold2)}
+
+/* FILTERS */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-label{font-size:9px;font-weight:800;color:var(--ink3);letter-spacing:1.2px;text-transform:uppercase;font-family:'Montserrat',sans-serif;white-space:nowrap}
+select,input[type=text]{padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:rgba(255,253,247,0.05);color:var(--ink);font-size:11px;font-family:'Nunito',sans-serif;outline:none;cursor:pointer}
+select:focus,input[type=text]:focus{border-color:var(--gold)}
+select option{background:var(--navy2);color:var(--ink)}
+input[type=text]{min-width:160px}
+input[type=text]::placeholder{color:var(--ink3)}
+.filter-count{font-size:11px;color:var(--gold);margin-left:auto;font-weight:700;font-family:'Montserrat',sans-serif}
+
+/* RANKING TABLE */
+.ranking-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.ranking-header{background:var(--navy3);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border)}
+.ranking-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:var(--gold3);letter-spacing:1.2px;display:flex;align-items:center;gap:8px}
+.ranking-meta{font-size:10px;color:var(--gold);font-family:'Montserrat',sans-serif;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--navy4)}
+th{font-size:9px;font-weight:800;color:var(--gold);padding:9px 14px;text-align:left;font-family:'Montserrat',sans-serif;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--gold3)}
+tbody tr{border-bottom:1px solid rgba(200,146,42,0.08);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(200,146,42,0.06)}
+tbody tr.top1{background:linear-gradient(90deg,rgba(200,146,42,0.18),transparent)}
+tbody tr.top2{background:linear-gradient(90deg,rgba(200,146,42,0.1),transparent)}
+tbody tr.top3{background:linear-gradient(90deg,rgba(200,146,42,0.06),transparent)}
+td{font-size:12px;color:var(--ink2);padding:10px 14px;vertical-align:middle}
+.rank-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:14px;text-align:center;width:40px}
+.rank-1{color:var(--gold3)}.rank-2{color:#B0A080}.rank-3{color:#C09060}.rank-o{color:var(--ink3)}
+.loja-name{font-weight:700;color:var(--ink);font-size:12px;font-family:'Montserrat',sans-serif}
+.loja-reg{font-size:9px;color:var(--ink3);margin-top:1px;letter-spacing:0.3px}
+.val-main{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px}
+.val-gold{color:var(--gold3)}
+.val-azure{color:var(--azure)}
+.val-green{color:var(--green)}
+.val-red{color:#F05050}
+.badge-uf{display:inline-block;padding:2px 7px;background:rgba(200,146,42,0.12);color:var(--gold);border-radius:20px;font-size:9px;font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:0.5px;border:1px solid var(--border)}
+.mini-bar-bg{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;min-width:70px}
+.mini-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+
+/* ====================== MAPA ====================== */
+.mapa-container{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+@media(max-width:1000px){.mapa-container{grid-template-columns:1fr}}
+
+.map-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.map-header{background:var(--navy3);padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.map-header-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:var(--gold3);letter-spacing:1px}
+.map-controls{display:flex;gap:6px;flex-wrap:wrap}
+.map-ctrl-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:9px;font-weight:800;letter-spacing:1px;font-family:'Montserrat',sans-serif;cursor:pointer;transition:all 0.2s;text-transform:uppercase}
+.map-ctrl-btn.active,.map-ctrl-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.map-svg-wrap{padding:16px;background:var(--navy);min-height:380px;display:flex;align-items:center;justify-content:center;position:relative}
+.map-svg-wrap svg{width:100%;max-width:600px;height:auto}
+
+/* Brazil state paths */
+.estado-path{fill:var(--navy4);stroke:var(--navy2);stroke-width:1.5;cursor:pointer;transition:all 0.25s}
+.estado-path:hover{stroke:var(--gold);stroke-width:2;filter:brightness(1.3)}
+.estado-path.selected{stroke:var(--gold3);stroke-width:2.5}
+.estado-path.has-data{cursor:pointer}
+.estado-label{font-family:'Montserrat',sans-serif;font-size:8px;fill:rgba(255,253,247,0.6);font-weight:700;pointer-events:none;text-anchor:middle;dominant-baseline:middle}
+
+/* Map tooltip */
+.map-tooltip{position:absolute;background:var(--navy2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:'Montserrat',sans-serif;font-size:10px;color:var(--ink);pointer-events:none;display:none;z-index:50;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+.map-tooltip-title{font-weight:800;color:var(--gold);font-size:11px;margin-bottom:6px;letter-spacing:0.5px}
+.map-tooltip-row{display:flex;justify-content:space-between;gap:12px;margin-bottom:3px;font-size:9px;color:var(--ink3)}
+.map-tooltip-row span:last-child{font-weight:700;color:var(--ink)}
+
+/* Map legend */
+.map-legend{padding:10px 16px;border-top:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--ink3);font-family:'Montserrat',sans-serif}
+.legend-swatch{width:14px;height:8px;border-radius:2px}
+
+/* Side panel */
+.side-panel{display:flex;flex-direction:column;gap:12px}
+.estado-detail{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.estado-detail-header{background:var(--navy3);padding:12px 16px;border-bottom:1px solid var(--border)}
+.estado-detail-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.8px}
+.estado-detail-body{padding:14px 16px}
+.ed-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ed-kpi{background:var(--navy4);border-radius:7px;padding:8px 10px;text-align:center}
+.ed-kpi-val{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:var(--gold);line-height:1.1}
+.ed-kpi-label{font-size:8px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;font-family:'Montserrat',sans-serif}
+.ed-lojas-title{font-size:9px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;font-family:'Montserrat',sans-serif;margin-bottom:6px}
+.ed-loja-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(200,146,42,0.08);font-size:10px}
+.ed-loja-row:last-child{border-bottom:none}
+.ed-loja-name{color:var(--ink2);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.ed-loja-val{font-family:'Montserrat',sans-serif;font-weight:700;color:var(--gold);font-size:10px;white-space:nowrap;margin-left:6px}
+.ed-empty{text-align:center;padding:20px;color:var(--ink3);font-size:11px}
+
+/* MAPA CARTEIRAS */
+.carteira-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:12px}
+.cc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:all 0.2s}
+.cc-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 20px rgba(200,146,42,0.12)}
+.cc-head{background:var(--navy3);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cc-name{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:0.3px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-cnt{font-size:9px;color:var(--ink3);background:rgba(200,146,42,0.1);padding:2px 8px;border-radius:20px;font-family:'Montserrat',sans-serif;font-weight:700;white-space:nowrap;margin-left:6px;border:1px solid var(--border)}
+.cc-body{padding:12px 14px}
+.cc-kpis{display:flex;gap:6px;margin-bottom:10px}
+.cc-kpi{flex:1;text-align:center;padding:6px 2px;background:var(--navy4);border-radius:6px}
+.cc-kpi-val{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:var(--ink)}
+.cc-kpi-lbl{font-size:8px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.5px;margin-top:1px;font-family:'Montserrat',sans-serif}
+.cc-top-title{font-size:8px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;font-family:'Montserrat',sans-serif;margin-bottom:5px}
+.cc-loja{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(200,146,42,0.06);font-size:10px}
+.cc-loja:last-child{border-bottom:none}
+.cc-loja-rank{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--gold);font-size:9px;margin-right:5px;width:14px;flex-shrink:0}
+.cc-loja-nm{color:var(--ink2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.cc-loja-vl{font-family:'Montserrat',sans-serif;font-weight:700;color:var(--ink);font-size:10px;white-space:nowrap;margin-left:6px}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.chart-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;color:var(--gold);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.chart-wrap{position:relative;height:230px}
+.chart-wrap-lg{position:relative;height:270px}
+
+/* PAG */
+.pag{display:flex;align-items:center;justify-content:center;gap:4px;padding:12px;border-top:1px solid rgba(200,146,42,0.08)}
+.pag-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;color:var(--ink2);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.pag-btn:hover,.pag-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.pag-btn:disabled{opacity:0.25;cursor:not-allowed}
+.pag-info{font-size:10px;color:var(--ink3);margin:0 5px;font-family:'Montserrat',sans-serif}
+
+/* SCREEN */
+.screen{display:none}.screen.on{display:block}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:var(--ink3);margin-bottom:6px}
+.empty p{font-size:12px;color:var(--ink3);line-height:1.6}
+
+/* FOOTER */
+.footer{background:var(--navy2);border-top:1px solid var(--border);padding:14px 24px;margin-top:40px}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer-txt{font-family:'Montserrat',sans-serif;font-size:9px;color:rgba(168,144,96,0.5);letter-spacing:0.5px}
+.footer-sig{display:flex;align-items:center;gap:8px}
+.footer-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:var(--navy);font-family:'Montserrat',sans-serif}
+.footer-sig-txt{font-family:'Montserrat',sans-serif;font-size:9px;color:var(--gold);letter-spacing:0.3px}
+
+/* SECTION DIVIDER */
+.section-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+@media(max-width:900px){
+  .chart-grid{grid-template-columns:1fr}
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .assinatura{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:10px;width:100%}
+}
+@media(max-width:600px){
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .carteira-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-stripe"></div>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo-wrap">
+        <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 3C12 3 9 6 9 10C9 12.5 10.5 14 12 14.5L10.5 24C10.5 24.5 11 25 11.5 25L18.5 25C19 25 19.5 24.5 19.5 24L18 14.5C19.5 14 21 12.5 21 10C21 6 18 3 15 3Z" fill="#0B1A2E"/>
+          <path d="M12 14.5L18 14.5L19.5 24C19.5 24.5 19 25 18.5 25L11.5 25C11 25 10.5 24.5 10.5 24Z" fill="#FFF0CC"/>
+          <circle cx="15" cy="10" r="4" fill="#FFF0CC" opacity="0.9"/>
+          <circle cx="15" cy="10" r="2" fill="#0B1A2E"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Chiquinho Sorvetes</div>
+        <div class="brand-sub">Ranking Nacional</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="assinatura">
+        <div class="assin-av">CC</div>
+        <div>
+          <div class="assin-nome">Carlos Cleber</div>
+          <div class="assin-cargo">Consultor de Expansão</div>
+        </div>
+      </div>
+      <span class="mes-badge" id="mesBadge">— Sem dados —</span>
+      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+        ↑ Carregar Planilha
+      </button>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="loadFile(event)"/>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" id="btn-fat" onclick="setScreen('fat',this)">
+      <span class="ricon">💰</span> Faturamento
+    </button>
+    <button class="nav-btn" id="btn-ranking-oculto" onclick="setScreen('ranking-oculto',this)">
+      <span class="ricon">🏅</span> Ranking s/ Faturamento
+    </button>
+    <button class="nav-btn" id="btn-atend" onclick="setScreen('atend',this)">
+      <span class="ricon">👥</span> Atendimentos
+    </button>
+    <button class="nav-btn" id="btn-ticket" onclick="setScreen('ticket',this)">
+      <span class="ricon">🎫</span> Ticket Médio
+    </button>
+    <button class="nav-btn" id="btn-ifood" onclick="setScreen('ifood',this)">
+      <span class="ricon">🛵</span> iFood
+    </button>
+    <button class="nav-btn" id="btn-mapa-nacional" onclick="setScreen('mapa-nacional',this)">
+      <span class="ricon">🗺️</span> Mapa Nacional <span class="nav-badge">NOVO</span>
+    </button>
+    <button class="nav-btn" id="btn-mapa" onclick="setScreen('mapa',this)">
+      <span class="ricon">📁</span> Mapa por Carteira
+    </button>
+    <button class="nav-btn" id="btn-graficos" onclick="setScreen('graficos',this)">
+      <span class="ricon">📊</span> Gráficos
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- KPIs -->
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <!-- UPLOAD AREA -->
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" id="dropZone">
+    <div class="upload-icon">📊</div>
+    <div class="upload-title">Carregar dados do ranking</div>
+    <div class="upload-desc">Clique ou arraste o arquivo Excel (.xlsx) com os dados das lojas. O ranking é gerado automaticamente.</div>
+    <div class="upload-hint">Colunas: loja · estado · carteira · faturamento · atendimentos · ticket · ifood · mes</div>
+  </div>
+  <div class="tpl-bar">
+    <div><strong style="font-family:'Montserrat',sans-serif;font-size:12px;color:var(--ink)">Baixar modelo de planilha</strong><p>Colunas corretas. Preencha e suba todo mês.</p></div>
+    <button class="btn-dl" onclick="downloadTemplate()">⬇ Baixar modelo</button>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screen on" id="screen-fat"><div id="fat-content"></div></div>
+  <div class="screen" id="screen-ranking-oculto"><div id="ranking-oculto-content"></div></div>
+  <div class="screen" id="screen-atend"><div id="atend-content"></div></div>
+  <div class="screen" id="screen-ticket"><div id="ticket-content"></div></div>
+  <div class="screen" id="screen-ifood"><div id="ifood-content"></div></div>
+  <div class="screen" id="screen-mapa-nacional"><div id="mapa-nacional-content"></div></div>
+  <div class="screen" id="screen-mapa"><div id="mapa-content"></div></div>
+  <div class="screen" id="screen-graficos"><div id="graficos-content"></div></div>
+</div>
+
+<div class="footer">
+  <div class="footer-inner">
+    <div class="footer-txt">CHIQUINHO SORVETES · RANKING NACIONAL · SISTEMA DE CONSULTORIA DE EXPANSÃO</div>
+    <div class="footer-sig">
+      <div class="footer-av">CC</div>
+      <div class="footer-sig-txt">Carlos Cleber · Consultor de Expansão</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────── STATE ─────────────────── */
+let allData=[];
+let charts={};
+let pageState={fat:1,atend:1,ticket:1,ifood:1,'ranking-oculto':1};
+let mapMode='lojas'; // 'lojas' | 'ticket' | 'ifood'
+let selectedEstado=null;
+const PAGE=25;
+
+const REGIOES={AC:'Norte',AM:'Norte',AP:'Norte',PA:'Norte',RO:'Norte',RR:'Norte',TO:'Norte',
+  AL:'Nordeste',BA:'Nordeste',CE:'Nordeste',MA:'Nordeste',PB:'Nordeste',PE:'Nordeste',PI:'Nordeste',RN:'Nordeste',SE:'Nordeste',
+  DF:'Centro-Oeste',GO:'Centro-Oeste',MS:'Centro-Oeste',MT:'Centro-Oeste',
+  ES:'Sudeste',MG:'Sudeste',RJ:'Sudeste',SP:'Sudeste',
+  PR:'Sul',RS:'Sul',SC:'Sul'};
+
+const RANK_CFG={
+  fat:{label:'Faturamento',field:'faturamento',fmt:fmtBRL,icon:'💰',color:'var(--gold3)'},
+  'ranking-oculto':{label:'Atend + Ticket + iFood',field:'_score',fmt:v=>fmtN(v)+'pts',icon:'🏅',color:'var(--gold3)'},
+  atend:{label:'Atendimentos',field:'atendimentos',fmt:fmtN,icon:'👥',color:'var(--azure)'},
+  ticket:{label:'Ticket Médio',field:'ticket',fmt:fmtBRL2,icon:'🎫',color:'var(--green)'},
+  ifood:{label:'iFood',field:'ifood',fmt:fmtBRL,icon:'🛵',color:'#F05050'},
+};
+
+/* ─────────────────── UTILS ─────────────────── */
+function fmtBRL(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtBRL2(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtN(v){return Number(v||0).toLocaleString('pt-BR');}
+function clean(s){return(s||'').toString().trim().toLowerCase();}
+function num(v){if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[^0-9.,]/g,'').replace(',','.'));return isNaN(n)?0:n;}
+
+function normalize(row){
+  const k=Object.keys(row);
+  const get=(...ns)=>{for(const n of ns){const f=k.find(x=>clean(x).includes(clean(n)));if(f&&row[f]!==undefined&&row[f]!=='')return row[f];}return'';};
+  const estado=(get('estado','uf','state')||'').toString().toUpperCase().trim();
+  const carteira=get('carteira','consultor','regiao','região','territory','zona')||estado||'Sem carteira';
+  const fat=num(get('faturamento','fat','revenue','receita'));
+  const atend=num(get('atendimentos','atend','pedidos','orders','visits'));
+  const ticket=num(get('ticket','tm','ticket medio','ticket médio'));
+  const ifood=num(get('ifood','delivery'));
+  return{
+    loja:(get('loja','unidade','nome','store')||'Sem nome').toString().trim(),
+    estado:estado||'—',regiao:REGIOES[estado]||'—',
+    carteira:carteira.toString().trim(),
+    faturamento:fat,atendimentos:atend,ticket,ifood,
+    mes:get('mes','mês','month','referencia')||'',
+    _score:0,
+  };
+}
+
+/* ─────────────────── LOAD ─────────────────── */
+function loadFile(evt){
+  const file=evt.target.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let rows=[];
+    if(ext==='csv'){rows=csvToRows(e.target.result);}
+    else{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];rows=XLSX.utils.sheet_to_json(ws,{defval:''});}
+    if(!rows.length){alert('Planilha vazia ou formato não reconhecido.');return;}
+    allData=rows.map(normalize).filter(r=>r.faturamento>0||r.atendimentos>0);
+    if(!allData.length){alert('Nenhum dado válido.');return;}
+    // Compute _score (atend normalizado + ticket normalizado + ifood normalizado)
+    const maxA=Math.max(...allData.map(r=>r.atendimentos));
+    const maxT=Math.max(...allData.map(r=>r.ticket));
+    const maxI=Math.max(...allData.map(r=>r.ifood));
+    allData.forEach(r=>{
+      r._score=Math.round(
+        (maxA>0?r.atendimentos/maxA:0)*333+
+        (maxT>0?r.ticket/maxT:0)*334+
+        (maxI>0?r.ifood/maxI:0)*333
+      );
+    });
+    const mes=allData.find(r=>r.mes)?.mes||file.name.replace(/\.[^.]+$/,'');
+    document.getElementById('mesBadge').textContent=mes.toString().toUpperCase();
+    document.getElementById('uploadArea').style.display='none';
+    renderAll();
+    evt.target.value='';
+  };
+  if(ext==='csv')reader.readAsText(file,'UTF-8');
+  else reader.readAsArrayBuffer(file);
+}
+
+function csvToRows(text){
+  const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2)return[];
+  const sep=lines[0].includes(';')?';':',';
+  const headers=lines[0].split(sep).map(h=>h.trim().replace(/"/g,''));
+  return lines.slice(1).map(line=>{const vals=line.split(sep).map(v=>v.trim().replace(/"/g,''));const obj={};headers.forEach((h,i)=>{obj[h]=vals[i]||'';});return obj;});
+}
+
+/* ─────────────────── RENDER ALL ─────────────────── */
+function renderAll(){
+  renderKPIs();
+  ['fat','ranking-oculto','atend','ticket','ifood'].forEach(k=>renderRanking(k));
+  renderMapaNacional();
+  renderMapaCarteiras();
+  renderGraficos();
+}
+
+/* ─────────────────── KPIs ─────────────────── */
+function renderKPIs(){
+  const fat=allData.reduce((s,r)=>s+r.faturamento,0);
+  const atend=allData.reduce((s,r)=>s+r.atendimentos,0);
+  const tk=allData.filter(r=>r.ticket>0);
+  const avgTk=tk.length?tk.reduce((s,r)=>s+r.ticket,0)/tk.length:0;
+  const ifood=allData.reduce((s,r)=>s+r.ifood,0);
+  const pif=fat>0?(ifood/fat*100):0;
+  const top=[...allData].sort((a,b)=>b.faturamento-a.faturamento)[0];
+  const carteiras=new Set(allData.map(r=>r.carteira)).size;
+  document.getElementById('kpiStrip').style.display='grid';
+  document.getElementById('kpiStrip').innerHTML=`
+    <div class="kpi" style="--kc:var(--gold3)"><div class="kpi-val">${fmtBRL(fat)}</div><div class="kpi-label">Faturamento total</div></div>
+    <div class="kpi" style="--kc:var(--gold)"><div class="kpi-val">${allData.length}</div><div class="kpi-label">Registros carregados</div></div>
+    <div class="kpi" style="--kc:var(--azure)"><div class="kpi-val">${fmtN(atend)}</div><div class="kpi-label">Atendimentos</div></div>
+    <div class="kpi" style="--kc:var(--green)"><div class="kpi-val">${fmtBRL2(avgTk)}</div><div class="kpi-label">Ticket médio</div></div>
+    <div class="kpi" style="--kc:#F05050"><div class="kpi-val">${pif.toFixed(1)}%</div><div class="kpi-label">iFood / fat.</div></div>
+    ${top?`<div class="kpi" style="--kc:var(--gold3)"><div class="kpi-val" style="font-size:12px">🥇 ${top.loja.split(' ')[0]}</div><div class="kpi-label">Líder nacional</div><div class="kpi-sub">${fmtBRL(top.faturamento)}</div></div>`:''}
+    <div class="kpi" style="--kc:var(--gold)"><div class="kpi-val">${carteiras}</div><div class="kpi-label">Carteiras ativas</div></div>
+  `;
+}
+
+/* ─────────────────── RANKING ─────────────────── */
+function renderRanking(key){
+  const cfg=RANK_CFG[key];
+  const isOculto=(key==='ranking-oculto');
+  const sorted=[...allData].filter(r=>r[cfg.field]>0).sort((a,b)=>b[cfg.field]-a[cfg.field]);
+  if(!sorted.length){document.getElementById(key+'-content').innerHTML=`<div class="empty"><div class="empty-icon">${cfg.icon}</div><h3>Sem dados</h3></div>`;return;}
+  const maxVal=sorted[0][cfg.field];
+  const totalVal=sorted.reduce((s,r)=>s+r[cfg.field],0);
+  const page=pageState[key]||1;
+
+  let html=`
+    <div class="filter-bar">
+      <span class="filter-label">Filtrar:</span>
+      <select id="fil-estado-${key}" onchange="applyFilter('${key}')">
+        <option value="">Todos os estados</option>
+        ${[...new Set(sorted.map(r=>r.estado))].sort().map(e=>`<option value="${e}">${e}</option>`).join('')}
+      </select>
+      <select id="fil-carteira-${key}" onchange="applyFilter('${key}')">
+        <option value="">Todas as carteiras</option>
+        ${[...new Set(sorted.map(r=>r.carteira))].sort().map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select>
+      <input type="text" id="fil-search-${key}" placeholder="🔍 Buscar loja..." oninput="applyFilter('${key}')"/>
+      <span class="filter-count" id="fil-count-${key}">${sorted.length} lojas</span>
+    </div>
+    <div class="ranking-wrap">
+      <div class="ranking-header">
+        <span class="ranking-title">${cfg.icon} RANKING ${cfg.label.toUpperCase()}</span>
+        <span class="ranking-meta">${sorted.length} lojas · ${isOculto?'Score combinado (sem faturamento)':cfg.label+': '+cfg.fmt(totalVal)}</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th style="width:44px">#</th>
+            <th>LOJA</th>
+            <th>UF</th>
+            <th>CARTEIRA</th>
+            ${isOculto?`
+              <th style="color:var(--azure)">ATEND.</th>
+              <th style="color:var(--green)">TICKET</th>
+              <th style="color:#F05050">iFOOD</th>
+              <th style="color:var(--gold3)">SCORE</th>
+            `:`
+              <th style="color:${cfg.color}">${cfg.label.toUpperCase()}</th>
+              <th>FATURAMENTO</th>
+              <th>PART.</th>
+            `}
+          </tr></thead>
+          <tbody id="tbody-${key}"></tbody>
+        </table>
+      </div>
+      <div class="pag" id="pag-${key}"></div>
+    </div>
+  `;
+  document.getElementById(key+'-content').innerHTML=html;
+  renderTablePage(key,sorted,page,maxVal,totalVal);
+}
+
+function renderTablePage(key,data,page,maxVal,totalVal){
+  const cfg=RANK_CFG[key];
+  const isOculto=(key==='ranking-oculto');
+  const start=(page-1)*PAGE;
+  const pageData=data.slice(start,start+PAGE);
+  let rows='';
+  pageData.forEach((r,idx)=>{
+    const rank=start+idx+1;
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    const rc=rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-o';
+    const pct=maxVal>0?(r[cfg.field]/maxVal*100):0;
+    const part=totalVal>0?((r[cfg.field]/totalVal)*100).toFixed(1):0;
+    const colClass=key==='fat'?'val-gold':key==='atend'?'val-azure':key==='ticket'?'val-green':key==='ifood'?'val-red':'val-gold';
+    if(isOculto){
+      rows+=`<tr class="${rank<=3?'top'+rank:''}">
+        <td><div class="rank-num ${rc}">${medal||rank}</div></td>
+        <td><div class="loja-name">${r.loja}</div><div class="loja-reg">${r.regiao}</div></td>
+        <td><span class="badge-uf">${r.estado}</span></td>
+        <td><span style="font-size:10px;color:var(--ink3);font-weight:600">${r.carteira}</span></td>
+        <td><div class="val-main val-azure">${fmtN(r.atendimentos)}</div></td>
+        <td><div class="val-main val-green">${fmtBRL2(r.ticket)}</div></td>
+        <td><div class="val-main val-red">${fmtBRL(r.ifood)}</div></td>
+        <td><div class="val-main val-gold" style="font-size:15px">${r._score}<span style="font-size:9px;color:var(--ink3)">pts</span></div>
+          <div class="mini-bar-bg" style="margin-top:3px"><div class="mini-bar-fill" style="width:${pct.toFixed(0)}%;background:var(--gold3)"></div></div>
+        </td>
+      </tr>`;
+    } else {
+      rows+=`<tr class="${rank<=3?'top'+rank:''}">
+        <td><div class="rank-num ${rc}">${medal||rank}</div></td>
+        <td><div class="loja-name">${r.loja}</div><div class="loja-reg">${r.regiao}</div></td>
+        <td><span class="badge-uf">${r.estado}</span></td>
+        <td><span style="font-size:10px;color:var(--ink3);font-weight:600">${r.carteira}</span></td>
+        <td><div class="val-main ${colClass}">${cfg.fmt(r[cfg.field])}</div></td>
+        <td><div style="font-size:11px;color:var(--ink3)">${fmtBRL(r.faturamento)}</div></td>
+        <td>
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:2px">${part}%</div>
+          <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${pct.toFixed(0)}%;background:var(--gold3);opacity:0.85"></div></div>
+        </td>
+      </tr>`;
+    }
+  });
+  document.getElementById('tbody-'+key).innerHTML=rows;
+  renderPag(key,data,page,maxVal,totalVal);
+}
+
+function renderPag(key,data,page,maxVal,totalVal){
+  const total=Math.ceil(data.length/PAGE);
+  if(total<=1){document.getElementById('pag-'+key).innerHTML='';return;}
+  let h=`<button class="pag-btn" onclick="changePage('${key}',${page-1})" ${page===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    if(i===1||i===total||Math.abs(i-page)<=1)h+=`<button class="pag-btn ${i===page?'active':''}" onclick="changePage('${key}',${i})">${i}</button>`;
+    else if(Math.abs(i-page)===2)h+=`<span class="pag-info">…</span>`;
+  }
+  h+=`<button class="pag-btn" onclick="changePage('${key}',${page+1})" ${page===total?'disabled':''}>›</button>`;
+  h+=`<span class="pag-info">Pág ${page}/${total} · ${data.length} lojas</span>`;
+  document.getElementById('pag-'+key).innerHTML=h;
+}
+
+function changePage(key,p){
+  const cfg=RANK_CFG[key];
+  const estado=document.getElementById('fil-estado-'+key)?.value||'';
+  const carteira=document.getElementById('fil-carteira-'+key)?.value||'';
+  const search=(document.getElementById('fil-search-'+key)?.value||'').toLowerCase();
+  let data=[...allData].filter(r=>r[cfg.field]>0).sort((a,b)=>b[cfg.field]-a[cfg.field]);
+  if(estado)data=data.filter(r=>r.estado===estado);
+  if(carteira)data=data.filter(r=>r.carteira===carteira);
+  if(search)data=data.filter(r=>r.loja.toLowerCase().includes(search));
+  const total=Math.ceil(data.length/PAGE);
+  if(p<1||p>total)return;
+  pageState[key]=p;
+  renderTablePage(key,data,p,data[0]?.[cfg.field]||0,data.reduce((s,r)=>s+r[cfg.field],0));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function applyFilter(key){
+  const cfg=RANK_CFG[key];
+  const estado=document.getElementById('fil-estado-'+key)?.value||'';
+  const carteira=document.getElementById('fil-carteira-'+key)?.value||'';
+  const search=(document.getElementById('fil-search-'+key)?.value||'').toLowerCase();
+  let data=[...allData].filter(r=>r[cfg.field]>0).sort((a,b)=>b[cfg.field]-a[cfg.field]);
+  if(estado)data=data.filter(r=>r.estado===estado);
+  if(carteira)data=data.filter(r=>r.carteira===carteira);
+  if(search)data=data.filter(r=>r.loja.toLowerCase().includes(search));
+  pageState[key]=1;
+  document.getElementById('fil-count-'+key).textContent=data.length+' lojas';
+  renderTablePage(key,data,1,data[0]?.[cfg.field]||0,data.reduce((s,r)=>s+r[cfg.field],0));
+}
+
+/* ─────────────────── MAPA NACIONAL ─────────────────── */
+
+// Brazil states coordinates (approximate centroids for labels + simplified paths)
+const STATE_CENTROIDS={
+  AC:[57,298],AM:[105,265],RR:[130,205],AP:[218,210],PA:[230,260],
+  TO:[255,305],MA:[295,245],PI:[320,270],CE:[355,235],RN:[385,240],
+  PB:[383,258],PE:[365,270],AL:[383,280],SE:[375,290],BA:[330,310],
+  MT:[205,340],MS:[220,395],GO:[265,360],DF:[278,362],MG:[290,390],
+  ES:[325,390],RJ:[305,408],SP:[270,415],PR:[245,445],SC:[250,470],
+  RS:[240,500],RO:[145,320],AC:[90,330],AM:[120,270],
+};
+
+// Color scale for choropleth
+function getStateColor(value,max,alpha=1){
+  if(!value||value===0)return`rgba(30,58,98,${alpha})`;
+  const t=value/max;
+  if(t>0.8)return`rgba(200,146,42,${alpha})`;
+  if(t>0.6)return`rgba(180,120,30,${alpha})`;
+  if(t>0.4)return`rgba(140,90,20,${alpha})`;
+  if(t>0.2)return`rgba(80,50,15,${alpha})`;
+  return`rgba(40,30,10,${alpha})`;
+}
+
+function renderMapaNacional(){
+  // Aggregate by state
+  const byEstado={};
+  allData.forEach(r=>{
+    const e=r.estado;
+    if(!e||e==='—')return;
+    if(!byEstado[e])byEstado[e]={fat:0,atend:0,ifood:0,ticket:[],lojas:[],count:0};
+    byEstado[e].fat+=r.faturamento;
+    byEstado[e].atend+=r.atendimentos;
+    byEstado[e].ifood+=r.ifood;
+    if(r.ticket>0)byEstado[e].ticket.push(r.ticket);
+    byEstado[e].lojas.push(r);
+    byEstado[e].count++;
+  });
+  Object.keys(byEstado).forEach(e=>{
+    const d=byEstado[e];
+    d.avgTicket=d.ticket.length?d.ticket.reduce((a,b)=>a+b,0)/d.ticket.length:0;
+  });
+
+  const maxFat=Math.max(...Object.values(byEstado).map(d=>d.fat),1);
+  const maxLojas=Math.max(...Object.values(byEstado).map(d=>d.count),1);
+
+  // Build SVG map of Brazil (simplified)
+  const svgPaths=getBrazilPaths(byEstado,maxFat,mapMode);
+
+  const html=`
+    <div class="section-label">🗺️ Mapa Nacional de Lojas</div>
+    <div class="mapa-container">
+      <div class="map-panel">
+        <div class="map-header">
+          <div class="map-header-title">🇧🇷 DISTRIBUIÇÃO NACIONAL</div>
+          <div class="map-controls">
+            <button class="map-ctrl-btn ${mapMode==='lojas'?'active':''}" onclick="setMapMode('lojas')">Nº Lojas</button>
+            <button class="map-ctrl-btn ${mapMode==='fat'?'active':''}" onclick="setMapMode('fat')">Faturamento</button>
+            <button class="map-ctrl-btn ${mapMode==='ticket'?'active':''}" onclick="setMapMode('ticket')">Ticket</button>
+          </div>
+        </div>
+        <div class="map-svg-wrap" id="mapSvgWrap">
+          ${svgPaths}
+          <div class="map-tooltip" id="mapTooltip"></div>
+        </div>
+        <div class="map-legend">
+          <span class="legend-item"><div class="legend-swatch" style="background:rgba(40,30,10,0.9)"></div> Baixo</span>
+          <span class="legend-item"><div class="legend-swatch" style="background:rgba(140,90,20,0.9)"></div> Médio</span>
+          <span class="legend-item"><div class="legend-swatch" style="background:rgba(200,146,42,0.9)"></div> Alto</span>
+          <span class="legend-item" style="margin-left:auto"><div class="legend-swatch" style="background:rgba(30,58,98,0.9)"></div> Sem lojas</span>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="estado-detail">
+          <div class="estado-detail-header">
+            <div class="estado-detail-title" id="estadoDetailTitle">📍 Clique em um estado</div>
+          </div>
+          <div class="estado-detail-body" id="estadoDetailBody">
+            <div class="ed-empty">Selecione um estado no mapa para ver os detalhes das lojas.</div>
+          </div>
+        </div>
+        <div class="map-panel">
+          <div class="map-header"><div class="map-header-title">📊 Ranking por Estado</div></div>
+          <div style="padding:0">
+            <table style="width:100%">
+              <thead><tr style="background:var(--navy4)">
+                <th style="padding:7px 10px;font-size:8px">#</th>
+                <th style="padding:7px 10px;font-size:8px">ESTADO</th>
+                <th style="padding:7px 10px;font-size:8px">LOJAS</th>
+                <th style="padding:7px 10px;font-size:8px">FATURAMENTO</th>
+              </tr></thead>
+              <tbody>
+                ${Object.entries(byEstado).sort((a,b)=>b[1].fat-a[1].fat).slice(0,15).map(([e,d],i)=>`
+                  <tr style="border-bottom:1px solid rgba(200,146,42,0.07);cursor:pointer" onclick="selectEstado('${e}')" onmouseenter="this.style.background='rgba(200,146,42,0.06)'" onmouseleave="this.style.background=''">
+                    <td style="padding:7px 10px;font-size:10px;color:var(--gold);font-family:'Montserrat',sans-serif;font-weight:800">${i+1}</td>
+                    <td style="padding:7px 10px"><span class="badge-uf">${e}</span></td>
+                    <td style="padding:7px 10px;font-size:11px;color:var(--ink2)">${d.count}</td>
+                    <td style="padding:7px 10px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--gold)">${fmtBRL(d.fat)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('mapa-nacional-content').innerHTML=html;
+  attachMapEvents(byEstado);
+}
+
+function setMapMode(mode){
+  mapMode=mode;
+  renderMapaNacional();
+}
+
+function selectEstado(uf){
+  const byEstado={};
+  allData.forEach(r=>{
+    if(!r.estado||r.estado==='—')return;
+    if(!byEstado[r.estado])byEstado[r.estado]={fat:0,atend:0,ifood:0,ticket:[],lojas:[],count:0};
+    byEstado[r.estado].fat+=r.faturamento;byEstado[r.estado].atend+=r.atendimentos;
+    byEstado[r.estado].ifood+=r.ifood;byEstado[r.estado].lojas.push(r);byEstado[r.estado].count++;
+    if(r.ticket>0)byEstado[r.estado].ticket.push(r.ticket);
+  });
+  showEstadoDetail(uf,byEstado[uf]);
+}
+
+function showEstadoDetail(uf,d){
+  if(!d){document.getElementById('estadoDetailBody').innerHTML='<div class="ed-empty">Sem dados para este estado.</div>';return;}
+  const avgT=d.ticket.length?d.ticket.reduce((a,b)=>a+b,0)/d.ticket.length:0;
+  const topLojas=[...d.lojas].sort((a,b)=>b.faturamento-a.faturamento).slice(0,8);
+  document.getElementById('estadoDetailTitle').textContent=`📍 ${uf} — ${REGIOES[uf]||''}`;
+  document.getElementById('estadoDetailBody').innerHTML=`
+    <div class="ed-kpi-grid">
+      <div class="ed-kpi"><div class="ed-kpi-val">${d.count}</div><div class="ed-kpi-label">Lojas</div></div>
+      <div class="ed-kpi"><div class="ed-kpi-val">${fmtBRL(d.fat)}</div><div class="ed-kpi-label">Faturamento</div></div>
+      <div class="ed-kpi"><div class="ed-kpi-val">${fmtBRL2(avgT)}</div><div class="ed-kpi-label">Ticket Méd.</div></div>
+      <div class="ed-kpi"><div class="ed-kpi-val">${(d.fat>0?(d.ifood/d.fat*100):0).toFixed(1)}%</div><div class="ed-kpi-label">iFood</div></div>
+    </div>
+    <div class="ed-lojas-title">Top lojas do estado</div>
+    ${topLojas.map((l,i)=>`
+      <div class="ed-loja-row">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:800;color:var(--gold);font-size:9px;width:16px;flex-shrink:0">${i+1}</span>
+        <span class="ed-loja-name" title="${l.loja}">${l.loja}</span>
+        <span class="ed-loja-val">${fmtBRL(l.faturamento)}</span>
+      </div>`).join('')}
+  `;
+}
+
+function attachMapEvents(byEstado){
+  document.querySelectorAll('.estado-path').forEach(el=>{
+    const uf=el.dataset.uf;
+    if(!uf)return;
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.estado-path').forEach(p=>p.classList.remove('selected'));
+      el.classList.add('selected');
+      showEstadoDetail(uf,byEstado[uf]);
+    });
+  });
+}
+
+// Simplified SVG paths for Brazilian states
+function getBrazilPaths(byEstado,maxVal,mode){
+  const getValue=(uf)=>{
+    const d=byEstado[uf];if(!d)return 0;
+    if(mode==='lojas')return d.count;
+    if(mode==='fat')return d.fat;
+    if(mode==='ticket')return d.avgTicket||0;
+    return d.count;
+  };
+  const maxV=Math.max(...Object.values(byEstado).map(d=>{
+    if(mode==='lojas')return d.count;
+    if(mode==='fat')return d.fat;
+    if(mode==='ticket')return d.avgTicket||0;
+    return d.count;
+  }),1);
+
+  const c=(uf)=>getStateColor(getValue(uf),maxV);
+  const label=(uf,x,y)=>{
+    const d=byEstado[uf];
+    const v=d?getValue(uf):0;
+    const vStr=mode==='fat'?'R$'+Math.round(v/1000)+'k':mode==='ticket'?'R$'+v.toFixed(0):String(v);
+    return`<text class="estado-label" x="${x}" y="${y-7}">${uf}</text>
+           <text class="estado-label" x="${x}" y="${y+6}" style="font-size:7px;fill:rgba(200,146,42,0.8)">${d?vStr:'—'}</text>`;
+  };
+
+  return`<svg viewBox="0 0 500 560" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="560" fill="#0B1A2E" rx="8"/>
+  <!-- NORTE -->
+  <path class="estado-path ${byEstado['AM']?'has-data':''}" data-uf="AM" d="M 60 180 L 200 165 L 215 230 L 190 270 L 120 295 L 70 265 L 55 220 Z" fill="${c('AM')}" />
+  ${label('AM',130,245)}
+  <path class="estado-path ${byEstado['PA']?'has-data':''}" data-uf="PA" d="M 200 165 L 310 155 L 330 175 L 320 265 L 260 285 L 215 270 L 215 230 Z" fill="${c('PA')}" />
+  ${label('PA',255,225)}
+  <path class="estado-path ${byEstado['RR']?'has-data':''}" data-uf="RR" d="M 95 155 L 200 160 L 200 165 L 60 180 L 55 160 Z" fill="${c('RR')}" />
+  ${label('RR',130,168)}
+  <path class="estado-path ${byEstado['AP']?'has-data':''}" data-uf="AP" d="M 300 145 L 340 140 L 345 170 L 330 175 L 310 155 Z" fill="${c('AP')}" />
+  ${label('AP',322,158)}
+  <path class="estado-path ${byEstado['AC']?'has-data':''}" data-uf="AC" d="M 55 270 L 120 295 L 115 335 L 60 330 L 45 300 Z" fill="${c('AC')}" />
+  ${label('AC',80,310)}
+  <path class="estado-path ${byEstado['RO']?'has-data':''}" data-uf="RO" d="M 120 295 L 190 270 L 195 330 L 165 355 L 115 335 Z" fill="${c('RO')}" />
+  ${label('RO',155,315)}
+  <path class="estado-path ${byEstado['TO']?'has-data':''}" data-uf="TO" d="M 260 285 L 320 265 L 325 340 L 290 360 L 250 345 L 240 315 Z" fill="${c('TO')}" />
+  ${label('TO',283,315)}
+
+  <!-- NORDESTE -->
+  <path class="estado-path ${byEstado['MA']?'has-data':''}" data-uf="MA" d="M 325 175 L 375 165 L 385 205 L 360 240 L 325 245 L 320 210 Z" fill="${c('MA')}" />
+  ${label('MA',350,210)}
+  <path class="estado-path ${byEstado['PI']?'has-data':''}" data-uf="PI" d="M 360 205 L 385 205 L 395 230 L 385 265 L 360 270 L 345 245 Z" fill="${c('PI')}" />
+  ${label('PI',370,242)}
+  <path class="estado-path ${byEstado['CE']?'has-data':''}" data-uf="CE" d="M 385 200 L 415 195 L 425 220 L 410 240 L 390 230 Z" fill="${c('CE')}" />
+  ${label('CE',403,218)}
+  <path class="estado-path ${byEstado['RN']?'has-data':''}" data-uf="RN" d="M 415 195 L 445 200 L 440 215 L 425 220 Z" fill="${c('RN')}" />
+  ${label('RN',432,210)}
+  <path class="estado-path ${byEstado['PB']?'has-data':''}" data-uf="PB" d="M 410 240 L 445 230 L 448 245 L 415 248 Z" fill="${c('PB')}" />
+  ${label('PB',430,240)}
+  <path class="estado-path ${byEstado['PE']?'has-data':''}" data-uf="PE" d="M 385 265 L 445 255 L 448 268 L 390 278 Z" fill="${c('PE')}" />
+  ${label('PE',417,265)}
+  <path class="estado-path ${byEstado['AL']?'has-data':''}" data-uf="AL" d="M 430 275 L 450 272 L 452 282 L 433 285 Z" fill="${c('AL')}" />
+  ${label('AL',441,279)}
+  <path class="estado-path ${byEstado['SE']?'has-data':''}" data-uf="SE" d="M 420 285 L 432 283 L 433 295 L 420 298 Z" fill="${c('SE')}" />
+  ${label('SE',426,291)}
+  <path class="estado-path ${byEstado['BA']?'has-data':''}" data-uf="BA" d="M 325 245 L 420 245 L 430 290 L 405 350 L 365 360 L 330 345 L 315 300 Z" fill="${c('BA')}" />
+  ${label('BA',370,300)}
+
+  <!-- CENTRO-OESTE -->
+  <path class="estado-path ${byEstado['MT']?'has-data':''}" data-uf="MT" d="M 165 355 L 250 345 L 265 380 L 250 420 L 185 415 L 165 385 Z" fill="${c('MT')}" />
+  ${label('MT',210,385)}
+  <path class="estado-path ${byEstado['GO']?'has-data':''}" data-uf="GO" d="M 265 355 L 325 345 L 335 390 L 310 420 L 275 415 L 260 385 Z" fill="${c('GO')}" />
+  ${label('GO',295,385)}
+  <path class="estado-path ${byEstado['DF']?'has-data':''}" data-uf="DF" d="M 298 387 L 308 384 L 310 393 L 300 396 Z" fill="${c('DF')}" stroke="var(--gold)" stroke-width="1"/>
+  ${label('DF',304,390)}
+  <path class="estado-path ${byEstado['MS']?'has-data':''}" data-uf="MS" d="M 185 415 L 255 420 L 260 465 L 220 470 L 185 455 Z" fill="${c('MS')}" />
+  ${label('MS',220,443)}
+
+  <!-- SUDESTE -->
+  <path class="estado-path ${byEstado['MG']?'has-data':''}" data-uf="MG" d="M 310 420 L 370 390 L 400 410 L 390 450 L 350 460 L 315 455 Z" fill="${c('MG')}" />
+  ${label('MG',352,430)}
+  <path class="estado-path ${byEstado['ES']?'has-data':''}" data-uf="ES" d="M 390 410 L 410 408 L 415 430 L 398 440 L 388 430 Z" fill="${c('ES')}" />
+  ${label('ES',401,424)}
+  <path class="estado-path ${byEstado['RJ']?'has-data':''}" data-uf="RJ" d="M 360 455 L 400 445 L 405 460 L 380 470 L 360 465 Z" fill="${c('RJ')}" />
+  ${label('RJ',382,458)}
+  <path class="estado-path ${byEstado['SP']?'has-data':''}" data-uf="SP" d="M 255 450 L 355 455 L 358 475 L 300 488 L 258 480 Z" fill="${c('SP')}" />
+  ${label('SP',305,468)}
+
+  <!-- SUL -->
+  <path class="estado-path ${byEstado['PR']?'has-data':''}" data-uf="PR" d="M 250 488 L 350 478 L 352 500 L 290 510 L 248 505 Z" fill="${c('PR')}" />
+  ${label('PR',298,494)}
+  <path class="estado-path ${byEstado['SC']?'has-data':''}" data-uf="SC" d="M 252 508 L 350 502 L 348 520 L 290 525 L 252 522 Z" fill="${c('SC')}" />
+  ${label('SC',298,514)}
+  <path class="estado-path ${byEstado['RS']?'has-data':''}" data-uf="RS" d="M 250 525 L 348 522 L 340 550 L 280 555 L 248 545 Z" fill="${c('RS')}" />
+  ${label('RS',294,538)}
+  </svg>`;
+}
+
+/* ─────────────────── MAPA CARTEIRAS ─────────────────── */
+function renderMapaCarteiras(){
+  const byCarteira={};
+  allData.forEach(r=>{
+    const c=r.carteira||'Sem carteira';
+    if(!byCarteira[c])byCarteira[c]={nome:c,lojas:[],fat:0,atend:0,ticket:[],ifood:0,estados:new Set()};
+    byCarteira[c].lojas.push(r);byCarteira[c].fat+=r.faturamento;
+    byCarteira[c].atend+=r.atendimentos;byCarteira[c].ifood+=r.ifood;
+    if(r.ticket>0)byCarteira[c].ticket.push(r.ticket);
+    if(r.estado&&r.estado!=='—')byCarteira[c].estados.add(r.estado);
+  });
+  const sorted=Object.values(byCarteira).sort((a,b)=>b.fat-a.fat);
+  const totalFat=sorted.reduce((s,c)=>s+c.fat,0);
+
+  let html=`
+    <div class="section-label">📁 Mapa por Carteira de Consultor</div>
+    <div class="filter-bar">
+      <span class="filter-label">Filtrar:</span>
+      <input type="text" id="fil-search-carteira" placeholder="🔍 Buscar consultor..." oninput="filterCarteiras()" style="min-width:200px"/>
+      <span class="filter-count" id="fil-cnt-carteira">${sorted.length} carteiras</span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-size:12px;color:var(--ink3)">${sorted.length} consultores · ${allData.length} registros · <span style="color:var(--gold);font-weight:700">${fmtBRL(totalFat)}</span> total</div>
+      <div style="display:flex;gap:6px">
+        <span style="font-size:10px;color:var(--ink3);font-family:'Montserrat',sans-serif">Ordenado por faturamento</span>
+      </div>
+    </div>
+    <div class="carteira-grid" id="carteiraGrid">
+  `;
+  sorted.forEach((c,ci)=>{
+    const avgT=c.ticket.length?c.ticket.reduce((a,b)=>a+b,0)/c.ticket.length:0;
+    const pctFat=totalFat>0?((c.fat/totalFat)*100).toFixed(1):0;
+    const pctI=c.fat>0?((c.ifood/c.fat)*100).toFixed(1):0;
+    const top5=[...c.lojas].sort((a,b)=>b.faturamento-a.faturamento).slice(0,5);
+    const medal=ci===0?'🥇':ci===1?'🥈':ci===2?'🥉':'';
+    html+=`
+      <div class="cc-card" data-nome="${c.nome.toLowerCase()}">
+        <div class="cc-head">
+          <div class="cc-name">${medal} ${c.nome}</div>
+          <div class="cc-cnt">${c.lojas.length} lojas · ${pctFat}%</div>
+        </div>
+        <div class="cc-body">
+          <div class="cc-kpis">
+            <div class="cc-kpi"><div class="cc-kpi-val" style="color:var(--gold)">${fmtBRL(c.fat)}</div><div class="cc-kpi-lbl">Fat.</div></div>
+            <div class="cc-kpi"><div class="cc-kpi-val" style="color:var(--azure)">${fmtN(c.atend)}</div><div class="cc-kpi-lbl">Atend.</div></div>
+            <div class="cc-kpi"><div class="cc-kpi-val" style="color:var(--green)">${fmtBRL2(avgT)}</div><div class="cc-kpi-lbl">Ticket</div></div>
+            <div class="cc-kpi"><div class="cc-kpi-val" style="color:#F05050">${pctI}%</div><div class="cc-kpi-lbl">iFood</div></div>
+          </div>
+          <div style="font-size:9px;color:var(--ink3);margin-bottom:6px;font-family:'Montserrat',sans-serif;letter-spacing:0.5px">
+            ESTADOS: ${[...c.estados].join(' · ')||'—'}
+          </div>
+          <div class="cc-top-title">Top lojas</div>
+          ${top5.map((l,i)=>`
+            <div class="cc-loja">
+              <span class="cc-loja-rank">${i+1}º</span>
+              <span class="cc-loja-nm" title="${l.loja}">${l.loja}</span>
+              <span class="cc-loja-vl">${fmtBRL(l.faturamento)}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    `;
+  });
+  html+='</div>';
+  document.getElementById('mapa-content').innerHTML=html;
+}
+
+function filterCarteiras(){
+  const q=(document.getElementById('fil-search-carteira')?.value||'').toLowerCase();
+  const cards=document.querySelectorAll('.cc-card');
+  let vis=0;
+  cards.forEach(c=>{
+    const show=!q||c.dataset.nome.includes(q);
+    c.style.display=show?'':'none';
+    if(show)vis++;
+  });
+  const el=document.getElementById('fil-cnt-carteira');
+  if(el)el.textContent=vis+' carteiras';
+}
+
+/* ─────────────────── GRÁFICOS ─────────────────── */
+function renderGraficos(){
+  const top10=[...allData].sort((a,b)=>b.faturamento-a.faturamento).slice(0,10);
+  const byEstado={};
+  allData.forEach(r=>{if(!byEstado[r.estado])byEstado[r.estado]=0;byEstado[r.estado]+=r.faturamento;});
+  const estadosSorted=Object.entries(byEstado).filter(([k])=>k&&k!=='—').sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const byRegiao={};
+  allData.forEach(r=>{if(!byRegiao[r.regiao])byRegiao[r.regiao]=0;byRegiao[r.regiao]+=r.faturamento;});
+  const byCarteira={};
+  allData.forEach(r=>{if(!byCarteira[r.carteira])byCarteira[r.carteira]=0;byCarteira[r.carteira]+=r.faturamento;});
+  const carteiraSorted=Object.entries(byCarteira).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  document.getElementById('graficos-content').innerHTML=`
+    <div class="section-label">📊 Análise Gráfica</div>
+    <div class="chart-grid">
+      <div class="chart-card" style="grid-column:span 2">
+        <div class="chart-title">🏆 Top 10 lojas · Faturamento</div>
+        <div class="chart-wrap-lg"><canvas id="ch-top10"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🗺️ Faturamento por estado</div>
+        <div class="chart-wrap"><canvas id="ch-estados"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🌎 Participação por região</div>
+        <div class="chart-wrap"><canvas id="ch-regiao"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column:span 2">
+        <div class="chart-title">📁 Faturamento por carteira</div>
+        <div class="chart-wrap-lg"><canvas id="ch-carteira"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  const G={color:'rgba(255,253,247,0.1)',tcolor:'#A89060'};
+  const opts=(axis)=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{[axis]:{ticks:{callback:v=>'R$'+Math.round(v/1000)+'k',color:tcolor=G.tcolor,font:{size:10}},grid:{color:G.color}},
+    [axis==='y'?'x':'y']:{ticks:{color:G.tcolor,font:{size:10}},grid:{display:false}}}});
+
+  if(charts.top10)charts.top10.destroy();
+  charts.top10=new Chart(document.getElementById('ch-top10'),{type:'bar',
+    data:{labels:top10.map(r=>r.loja.substring(0,28)),
+      datasets:[{data:top10.map(r=>r.faturamento),backgroundColor:top10.map((_,i)=>i===0?'#F5C842':i===1?'#C8922A':i===2?'#A07030':'rgba(200,146,42,0.55)'),borderRadius:5,borderSkipped:false}]},
+    options:opts('y')});
+
+  if(charts.estados)charts.estados.destroy();
+  charts.estados=new Chart(document.getElementById('ch-estados'),{type:'bar',
+    data:{labels:estadosSorted.map(([e])=>e),datasets:[{data:estadosSorted.map(([,v])=>v),backgroundColor:'rgba(200,146,42,0.7)',borderRadius:4}]},
+    options:{...opts('x'),indexAxis:'y'}});
+
+  if(charts.regiao)charts.regiao.destroy();
+  charts.regiao=new Chart(document.getElementById('ch-regiao'),{type:'doughnut',
+    data:{labels:Object.entries(byRegiao).filter(([k])=>k&&k!=='—').map(([k])=>k),
+      datasets:[{data:Object.entries(byRegiao).filter(([k])=>k&&k!=='—').map(([,v])=>v),
+        backgroundColor:['#C8922A','#0F2340','#D71920','#2D8A40','#1888A0'],borderWidth:2,borderColor:'#0B1A2E'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#A89060',font:{size:10},padding:8}}}}});
+
+  if(charts.carteira)charts.carteira.destroy();
+  charts.carteira=new Chart(document.getElementById('ch-carteira'),{type:'bar',
+    data:{labels:carteiraSorted.map(([k])=>k.substring(0,25)),
+      datasets:[{data:carteiraSorted.map(([,v])=>v),
+        backgroundColor:['#F5C842','#C8922A','#A07030','rgba(200,146,42,0.7)','rgba(200,146,42,0.5)','rgba(200,146,42,0.4)','rgba(200,146,42,0.3)','rgba(200,146,42,0.2)'],
+        borderRadius:5,borderSkipped:false}]},
+    options:opts('y')});
+}
+
+/* ─────────────────── NAV ─────────────────── */
+function setScreen(key,btn){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('screen-'+key).classList.add('on');
+}
+
+/* ─────────────────── TEMPLATE ─────────────────── */
+function downloadTemplate(){
+  const ws=XLSX.utils.aoa_to_sheet([
+    ['loja','estado','carteira','faturamento','atendimentos','ticket','ifood','mes'],
+    ['Taubaté 01 - Shopping (SP)','SP','Carlos Cleber',149031,5755,25.90,4401,'Janeiro'],
+    ['São José dos Campos 03 (SP)','SP','Carlos Cleber',147688,6216,23.76,3149,'Janeiro'],
+    ['Alfenas 01 (MG)','MG','Sul de Minas',89838,3863,23.26,7294,'Janeiro'],
+  ]);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Dados');
+  XLSX.writeFile(wb,'modelo_ranking_chiquinho.xlsx');
+}
+
+/* ─────────────────── DRAG DROP ─────────────────── */
+const dz=document.getElementById('uploadArea');
+if(dz){
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--gold)';});
+  dz.addEventListener('dragleave',()=>dz.style.borderColor='');
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.style.borderColor='';
+    const f=e.dataTransfer.files[0];
+    if(f)loadFile({target:{files:[f]}});
+  });
+}
+</script>
+</body>
+</html>
